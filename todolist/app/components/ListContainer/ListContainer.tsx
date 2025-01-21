@@ -15,6 +15,7 @@ export default function ListContainer() {
     const [draggedId, setDraggedId] = useState<string | null>(null);
     const listItemData:string[] = ["a","b","c"];
     const [dragOverId, setDragOverId] = useState<string | null>(null);
+    const [mouseIsOverBottom, setMouseIsOverBottom] = useState(false);
 
     const getDraggedItem = () => items.find(item => item.id === draggedId);
 
@@ -27,6 +28,7 @@ export default function ListContainer() {
 
     const handleDragStart = (id: string) => {
         setDraggedId(id);
+        setDragOverId(null);
     };
 
     const handleDragOver = (e: DragEvent<HTMLDivElement>, id: string | null) => {
@@ -38,8 +40,13 @@ export default function ListContainer() {
             }
             // Set dragOver after a small delay
             window.dragOverTimeout = setTimeout(() => {
-                setDragOverId(id);
-            }, 50); // 50ms delay
+                // Only set dragOverId if we're actually dragging
+                const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                const mouseY = e.clientY;
+                if (mouseY > rect.top && mouseY < rect.bottom) {
+                    setDragOverId(id);
+                }
+            }, 50);
         }
     };
 
@@ -97,8 +104,11 @@ export default function ListContainer() {
             className="list-container"
             onDragOver={(e) => {
                 e.preventDefault();
-                // Only show bottom placeholder if we're actually dragging over the container
-                if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const mouseY = e.clientY;
+                const isOverBottom = mouseY > rect.bottom - 20;
+                setMouseIsOverBottom(isOverBottom);
+                if (isOverBottom) {
                     handleDragOver(e, null);
                 }
             }}
@@ -139,7 +149,7 @@ export default function ListContainer() {
                     </div>
                 </>
             ))}
-            {dragOverId === null && draggedId && (
+            {dragOverId === null && draggedId && mouseIsOverBottom && (
                 <div className="list-item-placeholder" />
             )}
         </div>
