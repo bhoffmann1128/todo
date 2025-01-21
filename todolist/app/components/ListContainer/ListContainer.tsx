@@ -34,7 +34,7 @@ export default function ListContainer() {
 
     const handleDragOver = (e: DragEvent<HTMLDivElement>, id: string | null) => {
         e.preventDefault();
-        console.log("dragging over", e.target)
+        
         if (dragOverId !== id && draggedId !== id) {
             setDragOverId(id);
         }
@@ -47,32 +47,32 @@ export default function ListContainer() {
         }
         
         setIsPlaceholderFading(true);
+
+        if (draggedId && (dragOverId !== null || mouseIsOverBottom)) {
+          setItems(prevItems => {
+              const newItems = [...prevItems];
+              const draggedIndex = newItems.findIndex(item => item.id === draggedId);
+              const draggedItem = newItems[draggedIndex];
+              
+              newItems.splice(draggedIndex, 1);
+              
+              if (mouseIsOverBottom) {
+                  newItems.push(draggedItem);
+              } else if (dragOverId) {
+                  const dropIndex = newItems.findIndex(item => item.id === dragOverId);
+                  newItems.splice(dropIndex, 0, draggedItem);
+              }
+              
+              return newItems;
+          });
+      }
         
         setTimeout(() => {
-            if (draggedId && (dragOverId !== null || mouseIsOverBottom)) {
-                setItems(prevItems => {
-                    const newItems = [...prevItems];
-                    const draggedIndex = newItems.findIndex(item => item.id === draggedId);
-                    const draggedItem = newItems[draggedIndex];
-                    
-                    newItems.splice(draggedIndex, 1);
-                    
-                    if (mouseIsOverBottom) {
-                        newItems.push(draggedItem);
-                    } else if (dragOverId) {
-                        const dropIndex = newItems.findIndex(item => item.id === dragOverId);
-                        newItems.splice(dropIndex, 0, draggedItem);
-                    }
-                    
-                    return newItems;
-                });
-            }
-            
             setDraggedId(null);
             setDragOverId(null);
             setMouseIsOverBottom(false);
             setIsPlaceholderFading(false);
-        }, 300); // Match this with CSS animation duration
+        }, 400); // Match this with CSS animation duration
     };
 
     const handleListItemAdd = () => {
