@@ -96,10 +96,10 @@ export default function ListContainer() {
             const currentIndex = items.findIndex(i => i.id === itemId);
             const draggedIndex = items.findIndex(i => i.id === draggedId);
             
-            if (currentIndex !== draggedIndex + 1) {
-                if (window.dragOverTimeout) {
+            if (currentIndex !== draggedIndex + 1 ) { 
+                /*if (window.dragOverTimeout) {
                     clearTimeout(window.dragOverTimeout);
-                }
+                }*/
                 window.dragOverTimeout = setTimeout(() => {
                     handleDragOver(e, itemId);
                 }, 10);
