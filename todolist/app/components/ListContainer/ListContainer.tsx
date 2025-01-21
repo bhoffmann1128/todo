@@ -34,17 +34,17 @@ export default function ListContainer() {
     const handleDragOver = (e: DragEvent<HTMLDivElement>, id: string | null) => {
         e.preventDefault();
         if (dragOverId !== id && draggedId !== id) {
-            // Clear any existing timeout
             if (window.dragOverTimeout) {
                 clearTimeout(window.dragOverTimeout);
             }
-            // Set dragOver after a small delay
             window.dragOverTimeout = setTimeout(() => {
-                // Only set dragOverId if we're actually dragging
-                const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                const mouseY = e.clientY;
-                if (mouseY > rect.top && mouseY < rect.bottom) {
-                    setDragOverId(id);
+                const element = e.currentTarget;
+                if (element) {
+                    const rect = element.getBoundingClientRect();
+                    const mouseY = e.clientY;
+                    if (mouseY > rect.top && mouseY < rect.bottom) {
+                        setDragOverId(id);
+                    }
                 }
             }, 50);
         }
@@ -104,12 +104,15 @@ export default function ListContainer() {
             className="list-container"
             onDragOver={(e) => {
                 e.preventDefault();
-                const rect = e.currentTarget.getBoundingClientRect();
-                const mouseY = e.clientY;
-                const isOverBottom = mouseY > rect.bottom - 20;
-                setMouseIsOverBottom(isOverBottom);
-                if (isOverBottom) {
-                    handleDragOver(e, null);
+                const element = e.currentTarget;
+                if (element) {
+                    const rect = element.getBoundingClientRect();
+                    const mouseY = e.clientY;
+                    const isOverBottom = mouseY > rect.bottom - 20;
+                    setMouseIsOverBottom(isOverBottom);
+                    if (isOverBottom) {
+                        handleDragOver(e, null);
+                    }
                 }
             }}
             onDrop={(e) => handleDrop(e, null)}
