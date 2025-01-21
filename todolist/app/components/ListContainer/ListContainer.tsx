@@ -34,22 +34,7 @@ export default function ListContainer() {
     const handleDragOver = (e: DragEvent<HTMLDivElement>, id: string | null) => {
         e.preventDefault();
         if (dragOverId !== id && draggedId !== id) {
-            if (window.dragOverTimeout) {
-                clearTimeout(window.dragOverTimeout);
-            }
-            window.dragOverTimeout = setTimeout(() => {
-                const element = e.currentTarget;
-                if (element) {
-                    const rect = element.getBoundingClientRect();
-                    const mouseY = e.clientY;
-                    const upperBound = rect.top - rect.height / 2;
-                    const lowerBound = rect.bottom + rect.height / 2;
-                    
-                    if (mouseY > upperBound && mouseY < lowerBound) {
-                        setDragOverId(id);
-                    }
-                }
-            }, 50);
+            setDragOverId(id);
         }
     };
 
@@ -133,7 +118,28 @@ export default function ListContainer() {
                             setDragOverId(null);
                             setMouseIsOverBottom(false);
                         }}
-                        onDragOver={(e) => handleDragOver(e, item.id)}
+                        onDragOver={(e) => {
+                            e.preventDefault();
+                            const element = e.currentTarget;
+                            const rect = element.getBoundingClientRect();
+                            const mouseY = e.clientY;
+                            const threshold = rect.height / 3;
+
+                            // If mouse is within threshold of item and not the dragged item itself
+                            if (mouseY > rect.top - threshold && 
+                                mouseY < rect.bottom + threshold && 
+                                item.id !== draggedId) {
+                                
+                                // Find the index of current and dragged items
+                                const currentIndex = items.findIndex(i => i.id === item.id);
+                                const draggedIndex = items.findIndex(i => i.id === draggedId);
+                                
+                                // Only show placeholder if we're not immediately below the dragged item
+                                if (currentIndex !== draggedIndex + 1) {
+                                    handleDragOver(e, item.id);
+                                }
+                            }
+                        }}
                         onDragLeave={(e) => {
                             if (!e.currentTarget.contains(e.relatedTarget as Node)) {
                                 setDragOverId(null);
