@@ -42,7 +42,10 @@ export default function ListContainer() {
                 if (element) {
                     const rect = element.getBoundingClientRect();
                     const mouseY = e.clientY;
-                    if (mouseY > rect.top && mouseY < rect.bottom) {
+                    const upperBound = rect.top - rect.height / 2;
+                    const lowerBound = rect.bottom + rect.height / 2;
+                    
+                    if (mouseY > upperBound && mouseY < lowerBound) {
                         setDragOverId(id);
                     }
                 }
@@ -56,21 +59,17 @@ export default function ListContainer() {
             clearTimeout(window.dragOverTimeout);
         }
         
-        // Only reorder if we actually dragged to a new position
         if (draggedId && dragOverId !== null && draggedId !== dragOverId) {
             setItems(prevItems => {
                 const newItems = [...prevItems];
                 const draggedIndex = newItems.findIndex(item => item.id === draggedId);
                 const draggedItem = newItems[draggedIndex];
                 
-                // Remove the dragged item
                 newItems.splice(draggedIndex, 1);
                 
                 if (dragOverId === null) {
-                    // Drop at the end
                     newItems.push(draggedItem);
                 } else {
-                    // Drop at specific position
                     const dropIndex = newItems.findIndex(item => item.id === dragOverId);
                     newItems.splice(dropIndex, 0, draggedItem);
                 }
@@ -81,6 +80,7 @@ export default function ListContainer() {
         
         setDraggedId(null);
         setDragOverId(null);
+        setMouseIsOverBottom(false);
     };
 
     const handleListItemAdd = () => {
@@ -108,7 +108,7 @@ export default function ListContainer() {
                 if (element) {
                     const rect = element.getBoundingClientRect();
                     const mouseY = e.clientY;
-                    const isOverBottom = mouseY > rect.bottom - 20;
+                    const isOverBottom = mouseY > rect.bottom - 60;
                     setMouseIsOverBottom(isOverBottom);
                     if (isOverBottom) {
                         handleDragOver(e, null);
@@ -118,12 +118,11 @@ export default function ListContainer() {
             onDrop={(e) => handleDrop(e, null)}
         >
             {items.map((item) => (
-                <>
+                <div key={item.id}>
                     {dragOverId === item.id && draggedId !== item.id && (
                         <div className="list-item-placeholder" />
                     )}
                     <div 
-                        key={item.id}
                         draggable
                         onDragStart={() => handleDragStart(item.id)}
                         onDragEnd={() => {
@@ -132,6 +131,7 @@ export default function ListContainer() {
                             }
                             setDraggedId(null);
                             setDragOverId(null);
+                            setMouseIsOverBottom(false);
                         }}
                         onDragOver={(e) => handleDragOver(e, item.id)}
                         onDragLeave={(e) => {
@@ -150,7 +150,7 @@ export default function ListContainer() {
                             handleContentChange={handleContentChange}
                         />
                     </div>
-                </>
+                </div>
             ))}
             {dragOverId === null && draggedId && mouseIsOverBottom && (
                 <div className="list-item-placeholder" />
