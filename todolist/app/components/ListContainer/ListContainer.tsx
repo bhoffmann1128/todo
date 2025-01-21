@@ -17,6 +17,7 @@ export default function ListContainer() {
     const [dragOverId, setDragOverId] = useState<string | null>(null);
     const [mouseIsOverBottom, setMouseIsOverBottom] = useState(false);
     const [isPlaceholderFading, setIsPlaceholderFading] = useState(false);
+    const [fadingItemId, setFadingItemId] = useState<string | null>(null);
 
     const getDraggedItem = () => items.find(item => item.id === draggedId);
 
@@ -42,11 +43,13 @@ export default function ListContainer() {
 
     const handleDrop = (e: DragEvent<HTMLDivElement>, targetId: string | null) => {
         e.preventDefault();
+
         if (window.dragOverTimeout) {
             clearTimeout(window.dragOverTimeout);
         }
         
         setIsPlaceholderFading(true);
+        setFadingItemId(draggedId);
         
           setTimeout(() => {
 
@@ -72,7 +75,8 @@ export default function ListContainer() {
             setDragOverId(null);
             setMouseIsOverBottom(false);
             setIsPlaceholderFading(false);
-        }, 200); // Match this with CSS animation duration
+            setFadingItemId(null);
+        }, 300); // Match this with CSS animation duration
     };
 
     const handleListItemAdd = () => {
@@ -146,6 +150,11 @@ export default function ListContainer() {
                         id={item.id}
                         content={item.content}
                         isDragging={draggedId === item.id}
+                        className={`
+                          ${draggedId === item.id ? 'dragging' : ''}
+                          ${fadingItemId === item.id ? 'fade-out' : ''}
+                          ${!draggedId && !fadingItemId ? 'fade-in' : ''}
+                      `}
                         handleAdd={handleListItemAdd}
                         handleDelete={handleListItemDelete}
                         handleContentChange={handleContentChange}

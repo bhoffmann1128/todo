@@ -3,7 +3,8 @@
     flex-direction: column;
     transition: all .3s ease-in-out;
     max-height: 9000px;
-    transition: max-height .3s ease-in-out;
+    transition: all .3s ease-in-out;
+    overflow-y:visible;
 }
 
 .list-item-placeholder {
@@ -12,11 +13,13 @@
     border-radius: 4px;
     pointer-events: none;
     animation: fadeIn 0.2s ease;
+    transition: all .3s ease-in-out;
 }
 
 .list-item-placeholder.fade-out {
-    animation: fadeOut 0.3s ease;
-    animation-delay:1s;
+    opacity: 0;
+    /*animation: fadeOut 0.3s ease-in-out;*/
+    
 }
 
 @keyframes fadeIn {
@@ -43,7 +46,7 @@
 
 .list-item-wrapper {
     position: relative;
-    transition: transform 0.2s ease, opacity 0.2s ease;
+    transition: all .3s ease-in-out;
     transform-origin: top left;
     display: grid;
     grid-template-columns: 35px 8fr 1fr;
@@ -52,6 +55,13 @@
     &.dragging {
         opacity: 0.5;
         z-index: 10;
+    }
+    &.fade-out {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    &.fade-in {
+        animation: fadeIn 0.2s ease;
     }
     
     .list-item__input {

@@ -8,6 +8,7 @@ type ListItemProps = {
     id: string;
     content: string;
     isDragging?: boolean;
+    className?:string;
     handleAdd?: () => void;
     handleDelete?: (id: string) => void;
     handleContentChange?: (id: string, value: string) => void;
@@ -27,14 +28,15 @@ export default function ListItem({
     onDragStart,
     onDragOver,
     onDragEnd,
-    onDrop
+    onDrop,
+    className= ""
 }: ListItemProps) {
     const handleItemDragOver = (e: DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         const element = e.currentTarget;
         const rect = element.getBoundingClientRect();
         const mouseY = e.clientY;
-        const threshold = rect.height / 2;
+        const threshold = rect.height / 3;
 
         if (mouseY > rect.top - threshold && mouseY < rect.bottom + threshold) {
             onDragOver?.(e, id);
@@ -43,7 +45,7 @@ export default function ListItem({
 
     return (
         <div 
-            className={`list-item-wrapper ${isDragging ? 'dragging' : ''}`}
+            className={`list-item-wrapper ${className}`}
             draggable
             onDragStart={() => onDragStart?.(id)}
             onDragOver={handleItemDragOver}
