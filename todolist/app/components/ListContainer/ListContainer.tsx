@@ -48,27 +48,29 @@ export default function ListContainer() {
         if (window.dragOverTimeout) {
             clearTimeout(window.dragOverTimeout);
         }
-        if (!draggedId) return;
-
-        setItems(prevItems => {
-            const newItems = [...prevItems];
-            const draggedIndex = newItems.findIndex(item => item.id === draggedId);
-            const draggedItem = newItems[draggedIndex];
-            
-            // Remove the dragged item
-            newItems.splice(draggedIndex, 1);
-            
-            if (targetId === null) {
-                // Drop at the end
-                newItems.push(draggedItem);
-            } else {
-                // Drop at specific position
-                const dropIndex = newItems.findIndex(item => item.id === dragOverId);
-                newItems.splice(dropIndex, 0, draggedItem);
-            }
-            
-            return newItems;
-        });
+        
+        // Only reorder if we actually dragged to a new position
+        if (draggedId && dragOverId !== null && draggedId !== dragOverId) {
+            setItems(prevItems => {
+                const newItems = [...prevItems];
+                const draggedIndex = newItems.findIndex(item => item.id === draggedId);
+                const draggedItem = newItems[draggedIndex];
+                
+                // Remove the dragged item
+                newItems.splice(draggedIndex, 1);
+                
+                if (dragOverId === null) {
+                    // Drop at the end
+                    newItems.push(draggedItem);
+                } else {
+                    // Drop at specific position
+                    const dropIndex = newItems.findIndex(item => item.id === dragOverId);
+                    newItems.splice(dropIndex, 0, draggedItem);
+                }
+                
+                return newItems;
+            });
+        }
         
         setDraggedId(null);
         setDragOverId(null);
@@ -93,7 +95,13 @@ export default function ListContainer() {
     return (
         <div 
             className="list-container"
-            onDragOver={(e) => handleDragOver(e, null)}
+            onDragOver={(e) => {
+                e.preventDefault();
+                // Only show bottom placeholder if we're actually dragging over the container
+                if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                    handleDragOver(e, null);
+                }
+            }}
             onDrop={(e) => handleDrop(e, null)}
         >
             {items.map((item) => (
