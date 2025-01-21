@@ -137,11 +137,11 @@ export default function ListContainer() {
             onDrop={(e) => handleDrop(e, null)}
         >
             {items.map((item) => (
-              <>
+              <div key={`list-item-wrapper-${item.id}`}>
               {dragOverId === item.id && draggedId !== item.id && (
-                <div className={`list-item-placeholder ${isPlaceholderFading ? 'fade-out' : ''}`} />
+                <div key={`list-item-placeholder-top-${item.id}`} className={`list-item-placeholder ${isPlaceholderFading ? 'fade-out' : ''}`} />
               )}
-                <div key={item.id}>
+                <div key={`list-item-component-${item.id}`}>
                     <ListItem 
                         id={item.id}
                         content={item.content}
@@ -155,7 +155,7 @@ export default function ListContainer() {
                         onDrop={handleDrop}
                     />
                 </div>
-                </>
+              </div>
             ))}
             {dragOverId === null && draggedId && mouseIsOverBottom && (
                 <div className={`list-item-placeholder ${isPlaceholderFading ? 'fade-out' : ''}`} />
