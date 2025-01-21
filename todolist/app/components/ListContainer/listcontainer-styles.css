@@ -1,17 +1,7 @@
 .list-container {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-}
-
-.list-item-wrapper {
-    position: relative;
-    transition: transform 0.2s ease, opacity 0.2s ease;
-    transform-origin: top left;
-}
-
-.list-item-wrapper.dragging {
-    opacity: 0.5;
+    transition: all .3s ease-in-out;
 }
 
 .list-item-placeholder {
@@ -25,6 +15,7 @@
 
 .list-item-placeholder.fade-out {
     animation: fadeOut 0.3s ease;
+    animation-delay:1s;
 }
 
 @keyframes fadeIn {
@@ -47,4 +38,51 @@
         opacity: 0;
         transform: scaleY(0);
     }
+}
+
+.list-item-wrapper {
+    position: relative;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    transform-origin: top left;
+    display: grid;
+    grid-template-columns: 35px 8fr 1fr;
+    padding-block: .5rem;
+
+    &.dragging {
+        opacity: 0.5;
+        z-index: 10;
+    }
+    
+    .list-item__input {
+        border: 1px solid #777777;
+        padding-block: .75rem;
+        padding-inline: .75rem;
+        font-size: 1.15rem;
+    }
+
+    svg {
+        width: 25px;
+        height: 25px;
+        fill: #ffffff;
+    }
+
+    button {
+        background: transparent;
+        border: none;
+        padding: .25rem;
+        cursor: pointer;
+    }
+
+    .list-item__actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    .list-item__handle-container {
+        display: flex;
+        align-items: center;
+    }
+
+    
 }

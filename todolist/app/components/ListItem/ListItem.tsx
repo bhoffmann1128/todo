@@ -1,5 +1,4 @@
 'use client'
-import './listitem-styles.css';
 import AddIcon from '../../../public/add-icon.svg';
 import MoveIcon from '../../../public/move-icon.svg';
 import DeleteIcon from '../../../public/delete-icon.svg';

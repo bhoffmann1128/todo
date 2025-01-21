@@ -102,7 +102,7 @@ export default function ListContainer() {
                 }
                 window.dragOverTimeout = setTimeout(() => {
                     handleDragOver(e, itemId);
-                }, 100);
+                }, 10);
             }
         }
     };
