@@ -90,13 +90,27 @@ export default function ListContainer() {
             onDragOver={(e) => {
                 e.preventDefault();
                 const element = e.currentTarget;
-                if (element) {
-                    const rect = element.getBoundingClientRect();
-                    const mouseY = e.clientY;
-                    const isOverBottom = mouseY > rect.bottom - 60;
-                    setMouseIsOverBottom(isOverBottom);
-                    if (isOverBottom) {
-                        handleDragOver(e, null);
+                const rect = element.getBoundingClientRect();
+                const mouseY = e.clientY;
+                const threshold = rect.height / 2;
+
+                // If mouse is within threshold of item and not the dragged item itself
+                if (mouseY > rect.top - threshold && 
+                    mouseY < rect.bottom + threshold && 
+                    item.id !== draggedId) {
+                    
+                    // Find the index of current and dragged items
+                    const currentIndex = items.findIndex(i => i.id === item.id);
+                    const draggedIndex = items.findIndex(i => i.id === draggedId);
+                    
+                    // Only show placeholder if we're not immediately below the dragged item
+                    if (currentIndex !== draggedIndex + 1) {
+                        if (window.dragOverTimeout) {
+                            clearTimeout(window.dragOverTimeout);
+                        }
+                        window.dragOverTimeout = setTimeout(() => {
+                            handleDragOver(e, item.id);
+                        }, 100);
                     }
                 }
             }}
@@ -123,7 +137,7 @@ export default function ListContainer() {
                             const element = e.currentTarget;
                             const rect = element.getBoundingClientRect();
                             const mouseY = e.clientY;
-                            const threshold = rect.height / 3;
+                            const threshold = rect.height / 2;
 
                             // If mouse is within threshold of item and not the dragged item itself
                             if (mouseY > rect.top - threshold && 
@@ -136,7 +150,12 @@ export default function ListContainer() {
                                 
                                 // Only show placeholder if we're not immediately below the dragged item
                                 if (currentIndex !== draggedIndex + 1) {
-                                    handleDragOver(e, item.id);
+                                    if (window.dragOverTimeout) {
+                                        clearTimeout(window.dragOverTimeout);
+                                    }
+                                    window.dragOverTimeout = setTimeout(() => {
+                                        handleDragOver(e, item.id);
+                                    }, 100);
                                 }
                             }
                         }}
