@@ -5,21 +5,26 @@
     max-height: 9000px;
     transition: all .3s ease-in-out;
     overflow-y:visible;
+    margin-bottom:4rem;
 }
 
 .list-item-placeholder {
     height: 60px;
-    border: 2px dashed #003e53;
+    background-color: #003e53;
     border-radius: 4px;
+    margin: -4px 0;
     pointer-events: none;
-    animation: fadeIn 0.2s ease;
-    transition: all .3s ease-in-out;
+    opacity: 1;
+    transform: scaleY(1);
+    transition: all 0.3s ease;
+    transition-delay: .5s;
 }
 
 .list-item-placeholder.fade-out {
     opacity: 0;
-    /*animation: fadeOut 0.3s ease-in-out;*/
-    
+    transform: scaleY(0);
+    margin: 0;
+    height: 0;
 }
 
 @keyframes fadeIn {
@@ -69,6 +74,7 @@
         padding-block: .75rem;
         padding-inline: .75rem;
         font-size: 1.15rem;
+        border-radius:.25rem;
     }
 
     svg {

@@ -11,22 +11,33 @@ declare global {
 }
 
 export default function ListContainer() {
-    const [items, setItems] = useState<Array<{id: string, content: string}>>([]);
+  const [items, setItems] = useState<Array<{id: string, content: string}>>(() => {
+    // Try to load from localStorage during initialization
+        if (typeof window !== 'undefined') {
+            const savedItems = localStorage.getItem('todos');
+            if (savedItems) {
+                return JSON.parse(savedItems);
+            }
+        }
+        // Fall back to default items if no saved data
+        return listItemData.map(item => ({
+            id: uuidv4(),
+            content: item
+        }));
+    });
     const [draggedId, setDraggedId] = useState<string | null>(null);
     const listItemData:string[] = ["a","b","c"]; //the initial content of the list items.
     const [dragOverId, setDragOverId] = useState<string | null>(null);
     const [mouseIsOverBottom, setMouseIsOverBottom] = useState(false);
     const [isPlaceholderFading, setIsPlaceholderFading] = useState(false);
+    const [showPlaceholder, setShowPlaceholder] = useState(false);
     const [fadingItemId, setFadingItemId] = useState<string | null>(null);
-
     const getDraggedItem = () => items.find(item => item.id === draggedId);
 
-    useEffect(() => {
-        setItems(listItemData.map(item => ({
-            id: uuidv4(),
-            content: item
-        })));
-    }, []);
+  // Save todos to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('todos', JSON.stringify(items));
+  }, [items]);
 
     const handleDragStart = (id: string) => {
         setDraggedId(id);
@@ -50,6 +61,7 @@ export default function ListContainer() {
         
         setIsPlaceholderFading(true);
         setFadingItemId(draggedId);
+        setShowPlaceholder(true);
         
           setTimeout(() => {
 
@@ -71,13 +83,21 @@ export default function ListContainer() {
                   return newItems;
               });
           }
-            setDraggedId(null);
+            
+          
+          setDraggedId(null);
+          setFadingItemId(null);
+
+
+        // Second timeout to clean up placeholder states after fade animation
+        setTimeout(() => {
             setDragOverId(null);
             setMouseIsOverBottom(false);
             setIsPlaceholderFading(false);
-            setFadingItemId(null);
-        }, 300); // Match this with CSS animation duration
-    };
+            setShowPlaceholder(false);
+        }, 300); // Match this with CSS transition duration
+    },300);
+  };
 
     const handleListItemAdd = () => {
         setItems([...items, {id: uuidv4(), content: "New Item"}]);
@@ -142,9 +162,10 @@ export default function ListContainer() {
         >
             {items.map((item) => (
               <div key={`list-item-wrapper-${item.id}`}>
-              {dragOverId === item.id && draggedId !== item.id && (
-                <div key={`list-item-placeholder-top-${item.id}`} className={`list-item-placeholder ${isPlaceholderFading ? 'fade-out' : ''}`} />
-              )}
+              {(dragOverId === item.id && draggedId !== item.id) || 
+                 (showPlaceholder && dragOverId === item.id) ? (
+                    <div className={`list-item-placeholder ${isPlaceholderFading ? 'fade-out' : ''}`} />
+                ) : null}
                 <div key={`list-item-component-${item.id}`}>
                     <ListItem 
                         id={item.id}
@@ -166,9 +187,10 @@ export default function ListContainer() {
                 </div>
               </div>
             ))}
-            {dragOverId === null && draggedId && mouseIsOverBottom && (
+            {(dragOverId === null && draggedId && mouseIsOverBottom) || 
+            (showPlaceholder && mouseIsOverBottom) ? (
                 <div className={`list-item-placeholder ${isPlaceholderFading ? 'fade-out' : ''}`} />
-            )}
+            ) : null}
         </div>
     );
 }
