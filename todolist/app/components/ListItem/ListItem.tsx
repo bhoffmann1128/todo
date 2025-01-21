@@ -28,7 +28,6 @@ export default function ListItem({
     handleDelete,
     handleContentChange 
 }:ListItemProps){
-
     
     return (
         <div 

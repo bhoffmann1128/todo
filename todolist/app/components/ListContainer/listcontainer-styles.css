@@ -1,3 +1,22 @@
 .list-container {
-    width: 60vw;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.list-item-wrapper {
+    position: relative;
+    transition: opacity 0.2s ease;
+}
+
+.list-item-wrapper.dragging {
+    opacity: 0.5;
+}
+
+.list-item-placeholder {
+    height: 60px;
+    border: 2px dashed #ccc;
+    border-radius: 4px;
+    margin: -4px 0;
+    pointer-events: none;
 }

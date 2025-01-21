@@ -4,10 +4,19 @@ import { v4 as uuidv4 } from 'uuid';
 import ListItem from "../ListItem/ListItem";
 import "./listcontainer-styles.css";
 
+declare global {
+    interface Window {
+        dragOverTimeout: NodeJS.Timeout | undefined;
+    }
+}
+
 export default function ListContainer() {
     const [items, setItems] = useState<Array<{id: string, content: string}>>([]);
     const [draggedId, setDraggedId] = useState<string | null>(null);
     const listItemData:string[] = ["a","b","c"];
+    const [dragOverId, setDragOverId] = useState<string | null>(null);
+
+    const getDraggedItem = () => items.find(item => item.id === draggedId);
 
     useEffect(() => {
         setItems(listItemData.map(item => ({
@@ -20,20 +29,49 @@ export default function ListContainer() {
         setDraggedId(id);
     };
 
-    const handleDrop = (targetId: string) => {
-        if (draggedId && draggedId !== targetId) {
-            setItems(prevItems => {
-                const newItems = [...prevItems];
-                const draggedIndex = newItems.findIndex(item => item.id === draggedId);
-                const dropIndex = newItems.findIndex(item => item.id === targetId);
-                
-                const [draggedItem] = newItems.splice(draggedIndex, 1);
-                newItems.splice(dropIndex, 0, draggedItem);
-                
-                return newItems;
-            });
+    const handleDragOver = (e: DragEvent<HTMLDivElement>, id: string | null) => {
+        e.preventDefault();
+        if (dragOverId !== id && draggedId !== id) {
+            // Clear any existing timeout
+            if (window.dragOverTimeout) {
+                clearTimeout(window.dragOverTimeout);
+            }
+            // Set dragOver after a small delay
+            window.dragOverTimeout = setTimeout(() => {
+                setDragOverId(id);
+            }, 50); // 50ms delay
         }
+    };
+
+    const handleDrop = (e: DragEvent<HTMLDivElement>, targetId: string | null) => {
+        e.preventDefault();
+        if (window.dragOverTimeout) {
+            clearTimeout(window.dragOverTimeout);
+        }
+        if (!draggedId) return;
+
+        setItems(prevItems => {
+            const newItems = [...prevItems];
+            const draggedIndex = newItems.findIndex(item => item.id === draggedId);
+            const draggedItem = newItems[draggedIndex];
+            
+            // Remove the dragged item
+            newItems.splice(draggedIndex, 1);
+            
+            if (targetId === null) {
+                // Drop at the end
+                newItems.push(draggedItem);
+            } else {
+                // Drop at specific position
+                const dropIndex = newItems.findIndex(item => item.id === dragOverId);
+                newItems.splice(dropIndex, 0, draggedItem);
+            }
+            
+            return newItems;
+        });
+        
         setDraggedId(null);
+        setDragOverId(null);
     };
 
     const handleListItemAdd = () => {
@@ -41,7 +79,6 @@ export default function ListContainer() {
     };
 
     const handleListItemDelete = (id:string) => {
-      console.log("DELETE ID",id);
       setItems(items.filter(item => item.id !== id));
     };
 
@@ -54,24 +91,49 @@ export default function ListContainer() {
     };
 
     return (
-        <div className="list-container">
+        <div 
+            className="list-container"
+            onDragOver={(e) => handleDragOver(e, null)}
+            onDrop={(e) => handleDrop(e, null)}
+        >
             {items.map((item) => (
-                <div 
-                    key={item.id}
-                    draggable
-                    onDragStart={() => handleDragStart(item.id)}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={() => handleDrop(item.id)}
-                >
-                    <ListItem 
-                        id={item.id}
-                        content={item.content}
-                        handleAdd={handleListItemAdd}
-                        handleDelete={handleListItemDelete}
-                        handleContentChange={handleContentChange}
-                    />
-                </div>
+                <>
+                    {dragOverId === item.id && draggedId !== item.id && (
+                        <div className="list-item-placeholder" />
+                    )}
+                    <div 
+                        key={item.id}
+                        draggable
+                        onDragStart={() => handleDragStart(item.id)}
+                        onDragEnd={() => {
+                            if (window.dragOverTimeout) {
+                                clearTimeout(window.dragOverTimeout);
+                            }
+                            setDraggedId(null);
+                            setDragOverId(null);
+                        }}
+                        onDragOver={(e) => handleDragOver(e, item.id)}
+                        onDragLeave={(e) => {
+                            if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                                setDragOverId(null);
+                            }
+                        }}
+                        onDrop={(e) => handleDrop(e, item.id)}
+                        className={`list-item-wrapper ${draggedId === item.id ? 'dragging' : ''}`}
+                    >
+                        <ListItem 
+                            id={item.id}
+                            content={item.content}
+                            handleAdd={handleListItemAdd}
+                            handleDelete={handleListItemDelete}
+                            handleContentChange={handleContentChange}
+                        />
+                    </div>
+                </>
             ))}
+            {dragOverId === null && draggedId && (
+                <div className="list-item-placeholder" />
+            )}
         </div>
     );
 }
