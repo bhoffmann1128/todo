@@ -37,11 +37,12 @@ export default function ListContainer() {
     };
 
     const handleListItemAdd = () => {
-        console.log("Add");
+        setItems([...items, {id: uuidv4(), content: "New Item"}]);
     };
 
-    const handleListItemDelete = () => {
-        console.log("Delete");
+    const handleListItemDelete = (id:string) => {
+      console.log("DELETE ID",id);
+      setItems(items.filter(item => item.id !== id));
     };
 
     const handleContentChange = (id: string, newContent: string) => {

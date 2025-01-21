@@ -13,7 +13,7 @@ type ListItemProps = {
     onDragOver?: (e: DragEvent<HTMLDivElement>) => void,
     onDrop?: (e: DragEvent<HTMLDivElement>) => void,
     handleAdd?: () => void,
-    handleDelete?: () => void,
+    handleDelete?: (id:string) => void,
     handleContentChange?: (id: string, value: string) => void
 }
 
@@ -39,6 +39,9 @@ export default function ListItem({
             onDragOver={onDragOver}
             onDrop={onDrop}
         >
+            <div className="list-item__handle">
+                <button className="list-item__handle-button"><MoveIcon /></button>
+            </div>
             <input 
                 className="list-item__input" 
                 type="text" 
@@ -47,7 +50,7 @@ export default function ListItem({
             />
             <div className="list-item__actions">
                 <button onClick={handleAdd} className="list-item__handle"><AddIcon /></button>
-                <button onClick={handleDelete} className="list-item__handle"><DeleteIcon /></button>
+                <button onClick={()=>handleDelete?.(id)} className="list-item__handle"><DeleteIcon /></button>
             </div>
         </div>
     )
