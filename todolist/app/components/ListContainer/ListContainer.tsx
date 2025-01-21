@@ -47,32 +47,32 @@ export default function ListContainer() {
         }
         
         setIsPlaceholderFading(true);
-
-        if (draggedId && (dragOverId !== null || mouseIsOverBottom)) {
-          setItems(prevItems => {
-              const newItems = [...prevItems];
-              const draggedIndex = newItems.findIndex(item => item.id === draggedId);
-              const draggedItem = newItems[draggedIndex];
-              
-              newItems.splice(draggedIndex, 1);
-              
-              if (mouseIsOverBottom) {
-                  newItems.push(draggedItem);
-              } else if (dragOverId) {
-                  const dropIndex = newItems.findIndex(item => item.id === dragOverId);
-                  newItems.splice(dropIndex, 0, draggedItem);
-              }
-              
-              return newItems;
-          });
-      }
         
-        setTimeout(() => {
+          setTimeout(() => {
+
+            if (draggedId && (dragOverId !== null || mouseIsOverBottom)) {
+              setItems(prevItems => {
+                  const newItems = [...prevItems];
+                  const draggedIndex = newItems.findIndex(item => item.id === draggedId);
+                  const draggedItem = newItems[draggedIndex];
+                  
+                  newItems.splice(draggedIndex, 1);
+                  
+                  if (mouseIsOverBottom) {
+                      newItems.push(draggedItem);
+                  } else if (dragOverId) {
+                      const dropIndex = newItems.findIndex(item => item.id === dragOverId);
+                      newItems.splice(dropIndex, 0, draggedItem);
+                  }
+                  
+                  return newItems;
+              });
+          }
             setDraggedId(null);
             setDragOverId(null);
             setMouseIsOverBottom(false);
             setIsPlaceholderFading(false);
-        }, 400); // Match this with CSS animation duration
+        }, 200); // Match this with CSS animation duration
     };
 
     const handleListItemAdd = () => {
@@ -137,10 +137,11 @@ export default function ListContainer() {
             onDrop={(e) => handleDrop(e, null)}
         >
             {items.map((item) => (
+              <>
+              {dragOverId === item.id && draggedId !== item.id && (
+                <div className={`list-item-placeholder ${isPlaceholderFading ? 'fade-out' : ''}`} />
+              )}
                 <div key={item.id}>
-                    {dragOverId === item.id && draggedId !== item.id && (
-                        <div className={`list-item-placeholder ${isPlaceholderFading ? 'fade-out' : ''}`} />
-                    )}
                     <ListItem 
                         id={item.id}
                         content={item.content}
@@ -154,6 +155,7 @@ export default function ListContainer() {
                         onDrop={handleDrop}
                     />
                 </div>
+                </>
             ))}
             {dragOverId === null && draggedId && mouseIsOverBottom && (
                 <div className={`list-item-placeholder ${isPlaceholderFading ? 'fade-out' : ''}`} />
