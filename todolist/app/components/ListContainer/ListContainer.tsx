@@ -1,4 +1,5 @@
 'use client'
+
 import { DragEvent, useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import ListItem from "../ListItem/ListItem";
@@ -8,6 +9,12 @@ declare global {
     interface Window {
         dragOverTimeout: NodeJS.Timeout | undefined;
     }
+}
+
+declare global {
+  interface Window {
+      dragOverTimeout: NodeJS.Timeout | undefined;
+  }
 }
 
 export default function ListContainer() {
