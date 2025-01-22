@@ -34,35 +34,17 @@ export default function ListContainer() {
     ]
   }
   // Initialize with lazy loading from localStorage or default values
-  const [listTitle, setListTitle] = useState<string>(() => {
-    if (typeof window !== 'undefined') {
-      const savedData = localStorage.getItem('todo-list');
-      if (savedData) {
-        const parsedData = JSON.parse(savedData);
-        return parsedData.title || defaultListData.title;
-      }
-    }
-    return defaultListData.title;
-  });
+  const [listTitle, setListTitle] = useState<string>('');
+  const [items, setItems] = useState<Array<{id: string, content: string}>>([]);
 
-  const [items, setItems] = useState<Array<{id: string, content: string}>>(() => {
-    if (typeof window !== 'undefined') {
-      const savedData = localStorage.getItem('todo-list');
-      if (savedData) {
-        const parsedData = JSON.parse(savedData);
-        return parsedData.items || defaultListData.items;
-      }
-    }
-    return defaultListData.items;
-  });
-
-    const [draggedId, setDraggedId] = useState<string | null>(null);
-    const [dragOverId, setDragOverId] = useState<string | null>(null);
-    const [mouseIsOverBottom, setMouseIsOverBottom] = useState(false);
-    const [isPlaceholderFading, setIsPlaceholderFading] = useState(false);
-    const [showPlaceholder, setShowPlaceholder] = useState(false);
-    const [fadingItemId, setFadingItemId] = useState<string | null>(null);
-    const getDraggedItem = () => items.find(item => item.id === draggedId);
+  const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
+  const [mouseIsOverBottom, setMouseIsOverBottom] = useState(false);
+  const [isPlaceholderFading, setIsPlaceholderFading] = useState(false);
+  const [showPlaceholder, setShowPlaceholder] = useState(false);
+  const [fadingItemId, setFadingItemId] = useState<string | null>(null);
+  const getDraggedItem = () => items.find(item => item.id === draggedId);
+  const [isInitialized, setIsInitialized] = useState(false);
     
 
   const dateString = new Date().toLocaleDateString('en-US', {
@@ -72,13 +54,28 @@ export default function ListContainer() {
     day: 'numeric'
   });
 
-  // Save todos to localStorage whenever they change
+  // Load from localStorage after mount
   useEffect(() => {
+    const savedData = localStorage.getItem('todo-list');
+    if (savedData) {
+        const parsedData = JSON.parse(savedData);
+        if (parsedData.items) setItems(parsedData.items);
+        if (parsedData.title) setListTitle(parsedData.title);
+    }else {
+      setItems(defaultListData.items);
+      setListTitle(defaultListData.title);
+    }
+    setIsInitialized(true);
+  }, []);
 
+  // Save todos to localStorage whenever they change
+  useEffect(() => { 
+    if(!isInitialized) return;
     const saveList = {
       title: listTitle,
       items: items
     }
+    
     localStorage.setItem('todo-list', JSON.stringify(saveList));    
   }, [items, listTitle]);
 
@@ -101,45 +98,40 @@ export default function ListContainer() {
         if (window.dragOverTimeout) {
             clearTimeout(window.dragOverTimeout);
         }
+
+        if (draggedId && (dragOverId !== null || mouseIsOverBottom)) {
+          setItems(prevItems => {
+              const newItems = [...prevItems];
+              const draggedIndex = newItems.findIndex(item => item.id === draggedId);
+              const draggedItem = newItems[draggedIndex];
+              
+              newItems.splice(draggedIndex, 1);
+              
+              if (mouseIsOverBottom) {
+                  newItems.push(draggedItem);
+              } else if (dragOverId) {
+                  const dropIndex = newItems.findIndex(item => item.id === dragOverId);
+                  newItems.splice(dropIndex, 0, draggedItem);
+              }
+              
+              return newItems;
+          });
+        }
         
         setIsPlaceholderFading(true);
         setFadingItemId(draggedId);
         setShowPlaceholder(true);
-        
-          setTimeout(() => {
-
-            if (draggedId && (dragOverId !== null || mouseIsOverBottom)) {
-              setItems(prevItems => {
-                  const newItems = [...prevItems];
-                  const draggedIndex = newItems.findIndex(item => item.id === draggedId);
-                  const draggedItem = newItems[draggedIndex];
-                  
-                  newItems.splice(draggedIndex, 1);
-                  
-                  if (mouseIsOverBottom) {
-                      newItems.push(draggedItem);
-                  } else if (dragOverId) {
-                      const dropIndex = newItems.findIndex(item => item.id === dragOverId);
-                      newItems.splice(dropIndex, 0, draggedItem);
-                  }
-                  
-                  return newItems;
-              });
-          }
+      
             
-          
-          setDraggedId(null);
-          setFadingItemId(null);
-
-
         // Second timeout to clean up placeholder states after fade animation
         setTimeout(() => {
+            setDraggedId(null);
+            setFadingItemId(null);
             setDragOverId(null);
             setMouseIsOverBottom(false);
             setIsPlaceholderFading(false);
             setShowPlaceholder(false);
         }, 300); // Match this with CSS transition duration
-    },300);
   };
 
     const handleListItemAdd = () => {
@@ -204,14 +196,14 @@ export default function ListContainer() {
     return (
         <>
         <div className="list__header">
-        <div className="list__header-left">
-          <h1 className="list__header-title">TO<span>DO</span></h1>
-          <input className="list__header-list-title" onChange={handleListTitleChange} type="text" placeholder={"My List"} defaultValue={listTitle}/>
+          <div className="list__header-left">
+            <h1 className="list__header-title">TO<span>DO</span></h1>
+            <input className="list__header-list-title" onChange={handleListTitleChange} type="text" placeholder={"My List"} defaultValue={listTitle}/>
+          </div>
+          <div className="list__header-right">
+            <span className="list__header-date">{dateString}</span>
+          </div>
         </div>
-        <div className="list__header-right">
-          <span className="list__header-date">{dateString}</span>
-        </div>
-      </div>
         <div 
             className="list-container"
             onDragOver={handleContainerDragOver}
@@ -221,7 +213,7 @@ export default function ListContainer() {
               <div key={`list-item-wrapper-${item.id}`}>
               {(dragOverId === item.id && draggedId !== item.id) || 
                  (showPlaceholder && dragOverId === item.id) ? (
-                    <div className={`list-item-placeholder ${isPlaceholderFading ? 'fade-out' : ''}`} />
+                    <div className={`list-item-placeholder ${isPlaceholderFading ? 'fade-out' : ''}`} ></div>
                 ) : null}
                 <div key={`list-item-component-${item.id}`}>
                     <ListItem 
@@ -246,7 +238,7 @@ export default function ListContainer() {
             ))}
             {(dragOverId === null && draggedId && mouseIsOverBottom) || 
             (showPlaceholder && mouseIsOverBottom) ? (
-                <div className={`list-item-placeholder ${isPlaceholderFading ? 'fade-out' : ''}`} />
+                <div className={`list-item-placeholder ${isPlaceholderFading ? 'fade-out' : ''}`} ></div>
             ) : null}
         </div>
         </>
