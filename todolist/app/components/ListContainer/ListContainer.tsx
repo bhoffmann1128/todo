@@ -74,7 +74,7 @@ export default function ListContainer() {
       items: items
     }
     localStorage.setItem('todo-list', JSON.stringify(saveList));
-  }, [items]);
+  }, [items, listTitle]);
 
     const handleDragStart = (id: string) => {
         setDraggedId(id);
