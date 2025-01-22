@@ -36,6 +36,7 @@ export default function ListContainer() {
 
   // Save todos to localStorage whenever they change
   useEffect(() => {
+    console.log("updating", items);
     localStorage.setItem('todos', JSON.stringify(items));
   }, [items]);
 

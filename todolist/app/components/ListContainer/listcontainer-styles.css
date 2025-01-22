@@ -10,7 +10,7 @@
 
 .list-item-placeholder {
     height: 60px;
-    background-color: #003e53;
+    background-color: var(--accent);
     border-radius: 4px;
     margin: -4px 0;
     pointer-events: none;
@@ -54,7 +54,7 @@
     transition: all .3s ease-in-out;
     transform-origin: top left;
     display: grid;
-    grid-template-columns: 35px 8fr 1fr;
+    grid-template-columns: 55px 8fr .5fr;
     padding-block: .5rem;
 
     &.dragging {
@@ -70,7 +70,7 @@
     }
     
     .list-item__input {
-        border: 1px solid #777777;
+        border: 1px solid var(--accent);
         padding-block: .75rem;
         padding-inline: .75rem;
         font-size: 1.15rem;
@@ -78,9 +78,9 @@
     }
 
     svg {
-        width: 25px;
-        height: 25px;
-        fill: #ffffff;
+        width: 100%;
+        height: 100%;
+        fill: #575757;
     }
 
     button {
@@ -88,12 +88,29 @@
         border: none;
         padding: .25rem;
         cursor: pointer;
+
+
+        
     }
 
     .list-item__actions {
         display: flex;
         align-items: center;
-        justify-content: flex-end;
+        justify-content: space-between;
+        padding-inline:.5rem 0;
+
+        svg {
+            width: 25px;
+            height: 25px;
+            fill: var(--accent);
+        }
+
+        .list-item__add {
+            svg {
+                fill: #cccc;
+            }
+        }
+
     }
 
     .list-item__handle-container {

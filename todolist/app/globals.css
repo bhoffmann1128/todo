@@ -1,6 +1,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --accent:#0085cd;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -42,6 +43,28 @@ a {
 .page__header {
   margin-top: 3rem;
   padding-bottom: 1rem;
+  border-bottom: 1px solid var(--accent);
+  padding-block: 3rem .5rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom:1.5rem;
+  padding-bottom: 1rem;
+
+
+  .page__header-title {
+    font-size: .9rem;
+    font-style: italic;
+
+    span {
+      color: var(--accent)
+    }
+  }
+
+  .page__header-date {
+    font-size: .9rem;
+    font-style: italic;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
