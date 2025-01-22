@@ -12,17 +12,9 @@ declare global {
 
 export default function ListContainer() {
   
-  const [listTitle, setListTitle] = useState<string>(()=>{
-    if (typeof window !== 'undefined') {
-      const savedItems = localStorage.getItem('todo-list');
-      if (savedItems) {
-        return JSON.parse(savedItems).title;
-      }
-    }
-    return "My List";
-  });
-  const listItemData = {
-    title: listTitle,
+  
+  const defaultListData = {
+    title: "My List",
     items: [
       {
         id: uuidv4(),
@@ -34,22 +26,29 @@ export default function ListContainer() {
       }
     ]
   }
+  // Initialize with lazy loading from localStorage or default values
+  const [listTitle, setListTitle] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const savedData = localStorage.getItem('todo-list');
+      if (savedData) {
+        const parsedData = JSON.parse(savedData);
+        return parsedData.title || defaultListData.title;
+      }
+    }
+    return defaultListData.title;
+  });
 
   const [items, setItems] = useState<Array<{id: string, content: string}>>(() => {
-    // Try to load from localStorage during initialization
-        if (typeof window !== 'undefined') {
-            const savedItems = localStorage.getItem('todo-list');
-            if (savedItems) {
-                let parsedData = JSON.parse(savedItems);
-                return parsedData.items;
-            }
-        }
-        // Fall back to default items if no saved data
-        return listItemData.items.map(item => ({
-            id: item.id,
-            content: item.content
-        }));
-    });
+    if (typeof window !== 'undefined') {
+      const savedData = localStorage.getItem('todo-list');
+      if (savedData) {
+        const parsedData = JSON.parse(savedData);
+        return parsedData.items || defaultListData.items;
+      }
+    }
+    return defaultListData.items;
+  });
+
     const [draggedId, setDraggedId] = useState<string | null>(null);
     const [dragOverId, setDragOverId] = useState<string | null>(null);
     const [mouseIsOverBottom, setMouseIsOverBottom] = useState(false);
@@ -73,7 +72,7 @@ export default function ListContainer() {
       title: listTitle,
       items: items
     }
-    localStorage.setItem('todo-list', JSON.stringify(saveList));
+    localStorage.setItem('todo-list', JSON.stringify(saveList));    
   }, [items, listTitle]);
 
     const handleDragStart = (id: string) => {
@@ -200,7 +199,7 @@ export default function ListContainer() {
         <div className="list__header">
         <div className="list__header-left">
           <h1 className="list__header-title">TO<span>DO</span></h1>
-          <input className="list__header-list-title" onChange={handleListTitleChange} type="text" placeholder={listTitle ? listTitle : "My List"} defaultValue={listTitle}/>
+          <input className="list__header-list-title" onChange={handleListTitleChange} type="text" placeholder={"My List"} defaultValue={listTitle}/>
         </div>
         <div className="list__header-right">
           <span className="list__header-date">{dateString}</span>
